@@ -22,8 +22,6 @@ prompt = ChatPromptTemplate.from_messages(
 )
 
 def gererate_response(question, llm, temperature, max_tokens):
-    # Currently using my local llm model phi3 mini
-    llm = ChatOllama(model="phi3:mini")
     output_parser = StrOutputParser()
 
 
@@ -33,3 +31,29 @@ def gererate_response(question, llm, temperature, max_tokens):
     answer = chain.invoke({'question':question})
     return answer
 
+# Title of the app
+st.title("Q&A Chatbot with History")
+st.sidebar.title("Settings")
+ 
+ # Drop down to select various models
+llm = st.sidebar.selectbox("Select a model", ["phi3:mini"])
+
+# Adjust reponse parameter
+temperature =st.sidebar.slider("Temperature", min_value=0.0, max_value=1.0, value= 0.7)
+max_tokens = st.sidebar.slider("Max Tokens", min_value=50, max_value =300, value = 150)
+
+
+# Main interface for user input
+
+st.write("Ask any question")
+user_input = st.text_input("You:")
+
+# Currently using my local llm model phi3 mini
+llm = ChatOllama(model="phi3:mini")
+
+if user_input:
+    response = gererate_response(user_input,llm,temperature,max_tokens)
+    st.write(response)
+
+else:
+    st.write("Ask something first")
