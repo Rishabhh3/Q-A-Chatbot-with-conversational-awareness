@@ -3,6 +3,9 @@ from langchain_community.chat_models import ChatOllama
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_groq import ChatGroq
+from langchain_core.prompts import ChatMessagePromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
+
 import os
 
 from dotenv import load_dotenv
@@ -17,22 +20,42 @@ os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_PROJECT"] = "Q&A Chatbot with history" 
 
 
+#  Initialize chat history in session state if it doesn't exist
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
 # Prompt Template
+system_prompt = (
+    "You are a helpful, professional, and concise assistant. "
+    "Use the provided chat history to maintain context and continuity in the conversation. "
+    "Answer the user's questions accurately using your internal knowledge. "
+    "If you don't know the answer to a question, simply state that you don't know."
+)
+
 prompt = ChatPromptTemplate.from_messages(
     [
-        ("system","You are a helpful assistant. Please response to queries"),
+        ("system",system_prompt),
+        MessagesPlaceholder("chat_history"),
         ("user","Question:{question}")
     ]
 )
 
 def gererate_response(question, temperature, max_tokens):
+
     output_parser = StrOutputParser()
 
     # chain is something that tells you interaction is going to happen
     chain = prompt| llm | output_parser
     
-    answer = chain.invoke({'question':question})
+    answer = chain.invoke({'question':question,'chat_history':st.session_state.chat_history})
+
+    st.session_state.chat_history.extend([
+        HumanMessage(content=question),
+        AIMessage(content=answer)
+    ])
+
     return answer
+
 
 # Title of the app
 st.title("Q&A Chatbot with History")
