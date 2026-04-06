@@ -38,6 +38,11 @@ def gererate_response(question, temperature, max_tokens):
 st.title("Q&A Chatbot with History")
 st.sidebar.title("Settings")
  
+# Adjust reponse parameter
+temperature =st.sidebar.slider("Temperature", min_value=0.0, max_value=1.0, value= 0.7)
+max_tokens = st.sidebar.slider("Max Tokens", min_value=50, max_value =300, value = 150)
+
+
  # Drop down to select various models
 selected_model = st.sidebar.selectbox(
     "Select a model",
@@ -45,12 +50,9 @@ selected_model = st.sidebar.selectbox(
 )
 # specify which model to use
 llm=ChatGroq(groq_api_key=groq_api_key,
-             model_name=selected_model) 
-
-
-# Adjust reponse parameter
-temperature =st.sidebar.slider("Temperature", min_value=0.0, max_value=1.0, value= 0.7)
-max_tokens = st.sidebar.slider("Max Tokens", min_value=50, max_value =300, value = 150)
+             model_name=selected_model,
+             temperature=temperature,
+             max_tokens=max_tokens) 
 
 
 # Main interface for user input
